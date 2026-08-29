@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registrasi · CROWNPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-page:#FCEEF4; --bg-page2:#F7E0EC;
+    --ink-heading:#E23577; --ink-body:#9C7C97; --ink-soft:#C79BB4;
+    --panel:#FFFDFC; --border:#F1D8E4;
+    --input-bg:#FCF4F8;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; font-family:'Manrope',sans-serif; }
+  body{
+    display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;
+    background:
+      radial-gradient(120% 60% at 15% 0%, rgba(255,255,255,0.9), transparent 55%),
+      linear-gradient(175deg, var(--bg-page) 0%, var(--bg-page2) 55%, #F1DCE8 100%);
+  }
+  .card{
+    width:100%; max-width:400px; background:var(--panel);
+    border-radius:26px; padding:32px 28px 28px;
+    box-shadow:0 30px 70px -25px rgba(160,50,100,0.35);
+  }
+  .brand{ text-align:center; margin-bottom:6px; }
+  .brand h1{
+    font-family:'Fraunces', serif; font-weight:800; font-size:26px; color:var(--ink-heading);
+    letter-spacing:.01em;
+  }
+  .brand span{ font-size:11px; font-weight:700; letter-spacing:.18em; color:var(--ink-soft); text-transform:uppercase; }
+  .divider{ height:2px; margin:16px 0 22px; border-radius:2px; background:linear-gradient(90deg, transparent, var(--ink-heading), transparent); }
+
+  .field{ margin-bottom:15px; }
+  .field label{ display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; color:var(--ink-body); text-transform:uppercase; margin-bottom:6px; }
+  .field-opt{ font-weight:600; text-transform:none; letter-spacing:0; color:var(--ink-soft); font-size:10.5px; }
+  .field input{
+    width:100%; background:var(--input-bg); border:1.4px solid var(--border); border-radius:12px;
+    padding:12px 14px; font-size:13px; color:#2B2130; font-family:'Manrope',sans-serif;
+  }
+  .field input:focus{ outline:none; border-color:var(--ink-heading); }
+  .field input::placeholder{ color:#C7A9BC; }
+
+  .pw-row{ position:relative; }
+  .pw-row input{ padding-right:40px; }
+  .pw-eye{
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer; font-size:14px; color:var(--ink-soft);
+  }
+  .pw-suggest{
+    margin-top:8px; display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  .pw-suggest button{
+    border:none; background:var(--bg-page2); color:var(--ink-heading); font-weight:700; font-size:10.5px;
+    padding:7px 10px; border-radius:9px; cursor:pointer;
+  }
+  .pw-strength{ flex:1; height:5px; border-radius:99px; background:var(--border); overflow:hidden; }
+  .pw-strength-fill{ height:100%; width:0%; border-radius:99px; background:#E5E7EB; transition:all .25s ease; }
+  .pw-strength-label{ font-size:9.5px; font-weight:800; color:var(--ink-soft); min-width:44px; text-align:right; }
+
+  .submit-btn{
+    width:100%; margin-top:6px; border:none; cursor:pointer;
+    padding:14px; border-radius:14px; font-size:13px; font-weight:800; letter-spacing:.05em; color:#fff;
+    background:linear-gradient(160deg, #FF6FA8, var(--ink-heading));
+    box-shadow:0 14px 26px -12px rgba(226,53,119,0.65);
+  }
+  .submit-btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+  .msg{ font-size:12px; font-weight:700; text-align:center; margin-top:12px; min-height:16px; }
+  .msg.error{ color:#D3455A; }
+  .msg.ok{ color:#1FA97A; }
+
+  .foot-link{ text-align:center; margin-top:18px; font-size:12px; color:var(--ink-body); }
+  .foot-link a{ color:var(--ink-heading); font-weight:800; text-decoration:none; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <h1>CROWN PS</h1>
+      <span>Daftar Akun Player</span>
+    </div>
+    <div class="divider"></div>
+
+    <form id="regForm">
+      <div class="field">
+        <label>Grow ID</label>
+        <input type="text" id="growId" placeholder="Masukkan nama akun server kalian" required>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="Masukkan Gmail kalian" required>
+      </div>
+      <div class="field">
+        <label>Number</label>
+        <input type="tel" id="number" placeholder="Masukkan nomor kalian" required>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="pw-row">
+          <input type="password" id="password" placeholder="Masukkan password kalian" required minlength="6">
+          <button type="button" class="pw-eye" id="pwEye">👁</button>
+        </div>
+        <div class="pw-suggest">
+          <div class="pw-strength"><div class="pw-strength-fill" id="pwFill"></div></div>
+          <span class="pw-strength-label" id="pwLabel">—</span>
+          <button type="button" id="pwSuggestBtn">🔐 Sandi kuat</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Referral <span class="field-opt">(opsional)</span></label>
+        <input type="text" id="referral" placeholder="Masukkan referral jika ada">
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">REGISTRASI</button>
+      <div class="msg" id="formMsg"></div>
+    </form>
+
+    <div class="foot-link">Sudah punya akun? <a href="/login">Masuk di sini</a></div>
+  </div>
+
+<script>
+  const pwInput = document.getElementById('password');
+  const pwEye = document.getElementById('pwEye');
+  pwEye.addEventListener('click', () => {
+    pwInput.type = pwInput.type === 'password' ? 'text' : 'password';
+    pwEye.textContent = pwInput.type === 'password' ? '👁' : '🙈';
+  });
+
+  function strengthOf(pw){
+    let score = 0;
+    if(pw.length >= 8) score++;
+    if(pw.length >= 12) score++;
+    if(/[A-Z]/.test(pw)) score++;
+    if(/[0-9]/.test(pw)) score++;
+    if(/[^A-Za-z0-9]/.test(pw)) score++;
+    return score;
+  }
+  function renderStrength(){
+    const score = strengthOf(pwInput.value);
+    const fill = document.getElementById('pwFill');
+    const label = document.getElementById('pwLabel');
+    if(!pwInput.value){ fill.style.width='0%'; fill.style.background='#E5E7EB'; label.textContent='—'; return; }
+    const pct = Math.min(100, (score/5)*100);
+    fill.style.width = pct + '%';
+    if(score <= 1){ fill.style.background='#FB6F84'; label.textContent='Lemah'; }
+    else if(score <= 3){ fill.style.background='#FBBF24'; label.textContent='Sedang'; }
+    else { fill.style.background='#34D399'; label.textContent='Kuat'; }
+  }
+  pwInput.addEventListener('input', renderStrength);
+
+  document.getElementById('pwSuggestBtn').addEventListener('click', () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%';
+    let pw = '';
+    for(let i=0;i<14;i++) pw += chars[Math.floor(Math.random()*chars.length)];
+    pwInput.value = pw;
+    pwInput.type = 'text';
+    pwEye.textContent = '🙈';
+    renderStrength();
+  });
+
+  const form = document.getElementById('regForm');
+  const msg = document.getElementById('formMsg');
+  const submitBtn = document.getElementById('submitBtn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.className = 'msg'; msg.textContent = '';
+    submitBtn.disabled = true; submitBtn.textContent = 'Memproses...';
+
+    try{
+      const res = await fetch('/api/register', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          growId: document.getElementById('growId').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          number: document.getElementById('number').value.trim(),
+          password: pwInput.value,
+          referral: document.getElementById('referral').value.trim()
+        })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        msg.classList.add('error'); msg.textContent = data.error || 'Registrasi gagal.';
+        submitBtn.disabled = false; submitBtn.textContent = 'REGISTRASI';
+        return;
+      }
+      msg.classList.add('ok'); msg.textContent = 'Berhasil! Mengarahkan ke dashboard...';
+      window.location.href = data.redirect;
+    }catch(err){
+      msg.classList.add('error'); msg.textContent = 'Terjadi kesalahan jaringan.';
+      submitBtn.disabled = false; submitBtn.textContent = 'REGISTRASI';
+    }
+  });
+</script>
+</body>
+</html>

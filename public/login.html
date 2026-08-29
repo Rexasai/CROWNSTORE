@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masuk · CROWNPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-page:#FCEEF4; --bg-page2:#F7E0EC;
+    --ink-heading:#E23577; --ink-body:#9C7C97; --ink-soft:#C79BB4;
+    --panel:#FFFDFC; --border:#F1D8E4; --input-bg:#FCF4F8;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; font-family:'Manrope',sans-serif; }
+  body{
+    display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;
+    background:
+      radial-gradient(120% 60% at 15% 0%, rgba(255,255,255,0.9), transparent 55%),
+      linear-gradient(175deg, var(--bg-page) 0%, var(--bg-page2) 55%, #F1DCE8 100%);
+  }
+  .card{ width:100%; max-width:380px; background:var(--panel); border-radius:26px; padding:32px 28px 28px; box-shadow:0 30px 70px -25px rgba(160,50,100,0.35); }
+  .brand{ text-align:center; margin-bottom:6px; }
+  .brand h1{ font-family:'Fraunces', serif; font-weight:800; font-size:26px; color:var(--ink-heading); }
+  .brand span{ font-size:11px; font-weight:700; letter-spacing:.18em; color:var(--ink-soft); text-transform:uppercase; }
+  .divider{ height:2px; margin:16px 0 22px; border-radius:2px; background:linear-gradient(90deg, transparent, var(--ink-heading), transparent); }
+  .field{ margin-bottom:15px; }
+  .field label{ display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; color:var(--ink-body); text-transform:uppercase; margin-bottom:6px; }
+  .field input{ width:100%; background:var(--input-bg); border:1.4px solid var(--border); border-radius:12px; padding:12px 14px; font-size:13px; color:#2B2130; }
+  .field input:focus{ outline:none; border-color:var(--ink-heading); }
+  .submit-btn{ width:100%; margin-top:6px; border:none; cursor:pointer; padding:14px; border-radius:14px; font-size:13px; font-weight:800; letter-spacing:.05em; color:#fff; background:linear-gradient(160deg, #FF6FA8, var(--ink-heading)); box-shadow:0 14px 26px -12px rgba(226,53,119,0.65); }
+  .submit-btn:disabled{ opacity:.6; cursor:not-allowed; }
+  .msg{ font-size:12px; font-weight:700; text-align:center; margin-top:12px; min-height:16px; }
+  .msg.error{ color:#D3455A; }
+  .foot-link{ text-align:center; margin-top:18px; font-size:12px; color:var(--ink-body); }
+  .foot-link a{ color:var(--ink-heading); font-weight:800; text-decoration:none; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand"><h1>CROWN PS</h1><span>Masuk Akun Player</span></div>
+    <div class="divider"></div>
+    <form id="loginForm">
+      <div class="field"><label>Grow ID</label><input type="text" id="growId" placeholder="Masukkan Grow ID kalian" required></div>
+      <div class="field"><label>Password</label><input type="password" id="password" placeholder="Masukkan password kalian" required></div>
+      <button type="submit" class="submit-btn" id="submitBtn">MASUK</button>
+      <div class="msg" id="formMsg"></div>
+    </form>
+    <div class="foot-link">Belum punya akun? <a href="/register">Daftar di sini</a></div>
+  </div>
+<script>
+  const form = document.getElementById('loginForm');
+  const msg = document.getElementById('formMsg');
+  const submitBtn = document.getElementById('submitBtn');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.className = 'msg'; msg.textContent = '';
+    submitBtn.disabled = true; submitBtn.textContent = 'Memproses...';
+    try{
+      const res = await fetch('/api/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          growId: document.getElementById('growId').value.trim(),
+          password: document.getElementById('password').value
+        })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        msg.classList.add('error'); msg.textContent = data.error || 'Login gagal.';
+        submitBtn.disabled = false; submitBtn.textContent = 'MASUK';
+        return;
+      }
+      window.location.href = data.redirect;
+    }catch(err){
+      msg.classList.add('error'); msg.textContent = 'Terjadi kesalahan jaringan.';
+      submitBtn.disabled = false; submitBtn.textContent = 'MASUK';
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login · CROWNPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,600&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-base:#0F1116; --bg-panel:#171A22; --border:#282D39; --input-bg:#12141B;
+    --text-1:#EDEEF2; --text-2:#9BA1B0; --text-3:#5E6472; --brand:#E23577;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; font-family:'Manrope',sans-serif; background:var(--bg-base); color:var(--text-1); }
+  body{ display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
+  .card{ width:100%; max-width:380px; background:var(--bg-panel); border:1px solid var(--border); border-radius:22px; padding:32px 28px 28px; }
+  .brand{ text-align:center; margin-bottom:18px; }
+  .brand-mark{ width:44px; height:44px; margin:0 auto 12px; border-radius:12px; background:linear-gradient(155deg,#FF6FA8,var(--brand)); display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:700; font-style:italic; font-size:19px; }
+  .brand h1{ font-family:'Fraunces', serif; font-weight:700; font-size:20px; }
+  .brand span{ font-size:10.5px; font-weight:700; letter-spacing:.18em; color:var(--text-3); text-transform:uppercase; }
+  .field{ margin-bottom:15px; }
+  .field label{ display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; color:var(--text-2); text-transform:uppercase; margin-bottom:6px; }
+  .field input{ width:100%; background:var(--input-bg); border:1.4px solid var(--border); border-radius:11px; padding:12px 14px; font-size:13px; color:var(--text-1); font-family:'Space Mono',monospace; }
+  .field input:focus{ outline:none; border-color:var(--brand); }
+  .submit-btn{ width:100%; margin-top:6px; border:none; cursor:pointer; padding:13px; border-radius:12px; font-size:12.5px; font-weight:800; letter-spacing:.05em; color:#fff; background:var(--brand); }
+  .submit-btn:disabled{ opacity:.6; cursor:not-allowed; }
+  .msg{ font-size:12px; font-weight:700; text-align:center; margin-top:12px; min-height:16px; }
+  .msg.error{ color:#FB6F84; }
+  .hint{ text-align:center; margin-top:16px; font-size:10.5px; color:var(--text-3); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="brand-mark">C</div>
+      <h1>CROWNPS Admin</h1>
+      <span>Control Panel Access</span>
+    </div>
+    <form id="adminForm">
+      <div class="field"><label>Nama Admin</label><input type="text" id="namaAdmin" placeholder="cth. reysenoor" required></div>
+      <div class="field"><label>Token</label><input type="password" id="token" placeholder="Masukkan token admin" required></div>
+      <button type="submit" class="submit-btn" id="submitBtn">Login Admin</button>
+      <div class="msg" id="formMsg"></div>
+    </form>
+    <div class="hint">Token didapat dari owner server, bukan password pribadi.</div>
+  </div>
+<script>
+  const form = document.getElementById('adminForm');
+  const msg = document.getElementById('formMsg');
+  const submitBtn = document.getElementById('submitBtn');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.className = 'msg'; msg.textContent = '';
+    submitBtn.disabled = true; submitBtn.textContent = 'Memeriksa...';
+    try{
+      const res = await fetch('/api/admin-login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          namaAdmin: document.getElementById('namaAdmin').value.trim(),
+          token: document.getElementById('token').value
+        })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        msg.classList.add('error'); msg.textContent = data.error || 'Login gagal.';
+        submitBtn.disabled = false; submitBtn.textContent = 'Login Admin';
+        return;
+      }
+      localStorage.setItem('crownps_admin_name', document.getElementById('namaAdmin').value.trim());
+      window.location.href = data.redirect;
+    }catch(err){
+      msg.classList.add('error'); msg.textContent = 'Terjadi kesalahan jaringan.';
+      submitBtn.disabled = false; submitBtn.textContent = 'Login Admin';
+    }
+  });
+</script>
+</body>
+</html>
