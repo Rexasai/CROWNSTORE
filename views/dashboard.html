@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CROWNPS · Summon Hall</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,600&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-page:#FCEEF4;
+    --bg-page2:#F7E0EC;
+    --ink-heading:#E23577;
+    --ink-body:#9C7C97;
+    --ink-soft:#C79BB4;
+    --panel-dark:#16111F;
+    --panel-dark2:#1F1830;
+    --accent-gold:#F0B429;
+    --white:#FFFDFC;
+
+    --r1:#7C93FF;   /* celestial star */
+    --r1-soft:#3A3D66;
+    --r2:#FF6FA8;   /* bloom sanctuary */
+    --r2-soft:#4A2C3B;
+    --r3:#33D2C0;   /* arcana choice */
+    --r3-soft:#1E3A3D;
+    --r4:#C9A6FF;   /* clockwork continuum */
+    --r4-soft:#2E2A4D;
+
+    --common:#9CA3AF;
+    --rare:#4F9DFF;
+    --epic:#B463FF;
+    --legendary:#F0B429;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html,body{
+    height:100%;
+    background:#E9D3DE;
+    font-family:'Manrope', sans-serif;
+  }
+
+  .stage{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    min-height:100vh;
+    padding:0;
+  }
+
+  .app-shell{
+    position:relative;
+    width:100%;
+    max-width:430px;
+    height:100vh;
+    max-height:900px;
+    overflow:hidden;
+    background:
+      radial-gradient(120% 60% at 15% 0%, rgba(255,255,255,0.9), transparent 55%),
+      linear-gradient(175deg, var(--bg-page) 0%, var(--bg-page2) 55%, #F1DCE8 100%);
+    box-shadow:0 30px 80px -20px rgba(90,30,60,0.35);
+  }
+
+  /* ---------- ambient blush petals ---------- */
+  .petal{
+    position:absolute;
+    width:70px; height:70px;
+    border-radius:60% 40% 55% 45% / 55% 45% 60% 40%;
+    background:radial-gradient(circle at 35% 30%, rgba(255,111,168,0.28), rgba(255,111,168,0) 70%);
+    filter:blur(1px);
+    pointer-events:none;
+    animation:drift 14s ease-in-out infinite;
+  }
+  .petal.p1{ top:6%; left:-20px; animation-delay:0s;}
+  .petal.p2{ top:38%; right:-25px; width:90px; height:90px; animation-delay:2s;}
+  .petal.p3{ bottom:18%; left:-15px; width:55px; height:55px; animation-delay:4s;}
+  @keyframes drift{
+    0%,100%{ transform:translateY(0) rotate(0deg);}
+    50%{ transform:translateY(-14px) rotate(8deg);}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .petal{animation:none;}
+  }
+
+  /* ---------- VIEW: HALL ---------- */
+  .view{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    transition:transform .45s cubic-bezier(.65,0,.35,1), opacity .35s ease;
+  }
+  .view-hall{ transform:translateX(0); }
+  .app-shell.pull-open .view-hall{ transform:translateX(-6%); opacity:.25; pointer-events:none; }
+
+  .view-pull{
+    transform:translateX(100%);
+    background:
+      radial-gradient(120% 70% at 50% -10%, rgba(255,255,255,0.06), transparent 60%),
+      var(--panel-dark);
+  }
+  .app-shell.pull-open .view-pull{ transform:translateX(0); }
+
+  .scroll{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .scroll::-webkit-scrollbar{ display:none; }
+
+  /* ---------- topbar ---------- */
+  .topbar{
+    position:relative; z-index:2;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 20px 10px;
+  }
+  .topbar-left{ display:flex; align-items:center; gap:12px; }
+  .burger{
+    width:38px; height:38px; border-radius:12px;
+    background:rgba(255,255,255,0.75);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .burger span, .burger::before, .burger::after{
+    content:""; position:absolute; width:16px; height:2px; border-radius:2px;
+    background:var(--ink-heading);
+  }
+  .burger::before{ transform:translateY(-5px); }
+  .burger::after{ transform:translateY(5px); }
+  .burger .dot{
+    position:absolute; top:6px; right:6px; width:7px; height:7px; border-radius:50%;
+    background:var(--ink-heading); border:2px solid var(--bg-page);
+  }
+  .greet-title{ font-size:15px; font-weight:800; color:var(--ink-heading); line-height:1.2; }
+  .greet-sub{ font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--ink-soft); }
+
+  .topbar-right{ display:flex; align-items:center; gap:8px; }
+  .lang-toggle{
+    display:flex; background:rgba(255,255,255,0.7); border-radius:999px; padding:3px;
+  }
+  .lang-toggle button{
+    border:none; background:transparent; font-family:'Space Mono',monospace;
+    font-size:11px; font-weight:700; padding:5px 10px; border-radius:999px; color:var(--ink-body);
+  }
+  .lang-toggle button.active{ background:var(--ink-heading); color:#fff; }
+  .coin-chip{
+    display:flex; align-items:center; gap:5px; background:#fff;
+    padding:6px 12px 6px 8px; border-radius:999px;
+    font-family:'Space Mono',monospace; font-weight:700; font-size:13px; color:#7A5A20;
+    box-shadow:0 6px 14px -6px rgba(0,0,0,0.15);
+  }
+  .coin-dot{
+    width:16px; height:16px; border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #FFE29A, var(--accent-gold));
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* ---------- hero ---------- */
+  .hero{ padding:14px 20px 6px; position:relative; z-index:2; }
+  .eyebrow-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px;}
+  .eyebrow{
+    display:flex; align-items:center; gap:6px;
+    font-family:'Space Mono',monospace; font-size:11px; font-weight:700;
+    letter-spacing:.16em; color:var(--ink-heading); text-transform:uppercase;
+  }
+  .coin-card{
+    display:flex; align-items:center; gap:10px;
+    background:#fff; border-radius:16px; padding:8px 10px 8px 12px;
+    box-shadow:0 10px 20px -10px rgba(0,0,0,0.18);
+  }
+  .coin-card .amt{ display:flex; flex-direction:column; line-height:1.05; }
+  .coin-card .amt b{ font-family:'Space Mono',monospace; font-size:15px; color:#1E1730;}
+  .coin-card .amt span{ font-size:9px; color:var(--ink-body); font-weight:700; letter-spacing:.05em;}
+  .coin-plus{
+    width:26px; height:26px; border-radius:50%;
+    background:var(--ink-heading); color:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:700;
+  }
+
+  h1.hero-title{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:30px;
+    color:#241B2E;
+    line-height:1.08;
+    margin-bottom:8px;
+  }
+  .hero-sub{ font-size:13px; color:var(--ink-body); line-height:1.5; max-width:280px; }
+
+  /* ---------- realm cards ---------- */
+  .realm-list{ padding:16px 20px 28px; display:flex; flex-direction:column; gap:16px; position:relative; z-index:2;}
+
+  .realm-card{
+    position:relative;
+    border-radius:22px;
+    overflow:hidden;
+    height:150px;
+    padding:16px 16px;
+    display:flex; flex-direction:column; justify-content:space-between;
+    background:var(--panel-dark);
+    border:1px solid rgba(255,255,255,0.06);
+    cursor:pointer;
+    transform:translateY(0);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .realm-card:active{ transform:scale(.98); }
+  .realm-card.locked{ cursor:not-allowed; }
+  .realm-card.shake{ animation:shake .4s ease; }
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-6px); }
+    40%{ transform:translateX(5px); }
+    60%{ transform:translateX(-4px); }
+    80%{ transform:translateX(3px); }
+  }
+
+  .realm-motif{ position:absolute; inset:0; }
+  .realm-scrim{
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%);
+  }
+
+  .realm-top, .realm-bottom{ position:relative; z-index:2; }
+  .realm-tag{
+    font-family:'Space Mono',monospace; font-size:10px; font-weight:700;
+    letter-spacing:.14em; text-transform:uppercase;
+  }
+  .realm-name{
+    font-family:'Fraunces', serif; font-weight:700; font-size:21px; color:#fff; margin-top:2px;
+  }
+  .realm-desc{ font-size:11.5px; color:rgba(255,255,255,0.72); margin-top:4px; max-width:78%; line-height:1.4;}
+
+  .realm-bottom{ display:flex; align-items:flex-end; justify-content:space-between; }
+  .go-arrow, .lock-icon{
+    width:38px; height:38px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.12);
+    backdrop-filter:blur(4px);
+    color:#fff; flex-shrink:0;
+  }
+  .maint-pill{
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(0,0,0,0.45); color:#fff; font-size:10.5px; font-weight:700;
+    padding:6px 10px; border-radius:999px;
+  }
+
+  /* realm 1 — celestial star motif */
+  .r1 .realm-motif{
+    background:
+      radial-gradient(circle at 78% 30%, rgba(124,147,255,0.55), transparent 55%),
+      radial-gradient(circle at 20% 80%, rgba(255,255,255,0.08), transparent 40%),
+      linear-gradient(140deg, #14122A, #1B1B3B 60%, #232055);
+  }
+  .r1 .stars i{
+    position:absolute; width:2px; height:2px; background:#fff; border-radius:50%;
+    animation:twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle{ 0%,100%{opacity:.2;} 50%{opacity:1;} }
+  .r1 .ring{
+    position:absolute; top:20%; right:8%; width:120px; height:60px;
+    border:1.4px solid rgba(255,255,255,0.5); border-radius:50%;
+    transform:rotate(-18deg);
+  }
+  .r1 .core{
+    position:absolute; top:22%; right:20%; width:34px; height:34px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff, #AFC0FF 40%, transparent 75%);
+    box-shadow:0 0 22px 6px rgba(124,147,255,0.55);
+  }
+
+  /* realm 2 — bloom sanctuary motif */
+  .r2 .realm-motif{
+    background:
+      radial-gradient(circle at 75% 20%, rgba(255,111,168,0.4), transparent 55%),
+      linear-gradient(140deg, #241222, #3A1B2C 55%, #4B2436);
+  }
+  .r2 .arch{
+    position:absolute; right:14%; top:8%; width:90px; height:120px;
+    border:1.4px solid rgba(255,255,255,0.35);
+    border-radius:60px 60px 6px 6px;
+  }
+  .r2 .arch::after{
+    content:""; position:absolute; inset:10px;
+    border:1px solid rgba(255,255,255,0.2);
+    border-radius:48px 48px 4px 4px;
+  }
+  .r2 .petal-mini{
+    position:absolute; width:10px; height:10px; border-radius:60% 40% 60% 40%;
+    background:rgba(255,150,190,0.55);
+  }
+
+  /* realm 3 — arcana choice motif */
+  .r3 .realm-motif{
+    background:
+      radial-gradient(circle at 72% 35%, rgba(51,210,192,0.35), transparent 55%),
+      linear-gradient(140deg, #0F1E26, #12242C 55%, #143A3E);
+  }
+  .r3 .dial{
+    position:absolute; top:14%; right:10%; width:100px; height:100px; border-radius:50%;
+    border:1.4px solid rgba(255,255,255,0.3);
+  }
+  .r3 .dial::before{
+    content:""; position:absolute; inset:16px; border-radius:50%;
+    border:1px dashed rgba(255,255,255,0.25);
+  }
+  .r3 .tick{
+    position:absolute; width:1.4px; height:8px; background:rgba(255,255,255,0.5);
+    top:50%; left:50%; transform-origin:0 40px;
+  }
+
+  /* realm 4 — clockwork continuum motif */
+  .r4 .realm-motif{
+    background:
+      radial-gradient(circle at 70% 25%, rgba(201,166,255,0.35), transparent 55%),
+      linear-gradient(140deg, #14122A, #1E1B3A 55%, #241F45);
+  }
+  .r4 .moon{
+    position:absolute; top:12%; right:14%; width:56px; height:56px; border-radius:50%;
+    background:#EDE3FF; box-shadow:-14px 0 0 -6px rgba(20,18,42,0.9);
+  }
+  .r4 .gate{
+    position:absolute; bottom:0; left:18%; width:64%; height:46px;
+    border-top:3px solid rgba(255,255,255,0.5);
+  }
+  .r4 .gate::before, .r4 .gate::after{
+    content:""; position:absolute; top:0; width:3px; height:46px; background:rgba(255,255,255,0.5);
+  }
+  .r4 .gate::before{ left:2px; }
+  .r4 .gate::after{ right:2px; }
+
+  /* ---------- bottom nav ---------- */
+  .bottomnav{
+    position:relative; z-index:3;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 22px calc(14px + env(safe-area-inset-bottom));
+    background:rgba(255,253,252,0.92);
+    backdrop-filter:blur(10px);
+    border-top:1px solid rgba(0,0,0,0.05);
+  }
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    font-size:10px; font-weight:700; color:#C9B2C2;
+  }
+  .nav-item.active{ color:var(--ink-heading); }
+  .nav-item .ico{ width:20px; height:20px; }
+  .nav-fab{
+    width:52px; height:52px; border-radius:50%; margin-top:-30px;
+    background:linear-gradient(160deg, #FF6FA8, var(--ink-heading));
+    display:flex; align-items:center; justify-content:center; color:#fff;
+    box-shadow:0 12px 22px -8px rgba(226,53,119,0.65), 0 0 0 6px rgba(255,253,252,0.92);
+  }
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:absolute; left:50%; bottom:100px; transform:translate(-50%, 12px);
+    background:#241B2E; color:#fff; font-size:12.5px; font-weight:600;
+    padding:10px 16px; border-radius:999px; z-index:10;
+    opacity:0; pointer-events:none; transition:all .25s ease;
+    white-space:nowrap;
+  }
+  .toast.show{ opacity:1; transform:translate(-50%, 0); }
+
+  /* ---------- drawer / player panel ---------- */
+  .drawer-overlay{
+    position:absolute; inset:0; z-index:20;
+    background:rgba(20,12,20,0.45);
+    opacity:0; pointer-events:none; transition:opacity .3s ease;
+  }
+  .drawer-overlay.show{ opacity:1; pointer-events:auto; }
+
+  .drawer{
+    position:absolute; top:0; bottom:0; left:0; z-index:21;
+    width:82%; max-width:320px;
+    background:linear-gradient(185deg, #1B1526, #14101F 60%);
+    transform:translateX(-100%);
+    transition:transform .35s cubic-bezier(.65,0,.35,1);
+    display:flex; flex-direction:column;
+    box-shadow:20px 0 60px -20px rgba(0,0,0,0.5);
+  }
+  .drawer-overlay.show .drawer{ transform:translateX(0); }
+
+  .drawer-head{
+    padding:22px 20px 16px;
+    display:flex; align-items:center; gap:12px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .drawer-avatar{
+    width:42px; height:42px; border-radius:14px;
+    background:linear-gradient(160deg, #FF6FA8, var(--ink-heading));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:'Fraunces',serif; font-weight:700; font-size:17px;
+  }
+  .drawer-name{ color:#fff; font-weight:800; font-size:14px; }
+  .drawer-sub{ color:rgba(255,255,255,0.45); font-size:10.5px; font-weight:600; letter-spacing:.04em; }
+  .drawer-close{
+    margin-left:auto; width:30px; height:30px; border-radius:10px;
+    background:rgba(255,255,255,0.08); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:14px;
+  }
+
+  .drawer-scroll{ flex:1; overflow-y:auto; padding:10px 10px 20px; }
+  .drawer-scroll::-webkit-scrollbar{ display:none; }
+
+  .drawer-link{
+    display:flex; align-items:center; gap:12px;
+    padding:11px 12px; border-radius:14px;
+    color:rgba(255,255,255,0.72); font-size:13px; font-weight:700;
+    cursor:pointer;
+  }
+  .drawer-link .ico{ font-size:15px; width:20px; text-align:center; }
+  .drawer-link:active{ background:rgba(255,255,255,0.06); }
+  .drawer-link.active{ background:rgba(226,53,119,0.18); color:#fff; }
+  .drawer-link.active .ico{ filter:drop-shadow(0 0 6px rgba(255,111,168,0.6)); }
+
+  .drawer-sub-list{ padding:0 12px 4px 42px; display:flex; flex-direction:column; gap:2px; }
+  .drawer-sub-item{
+    font-size:11.5px; color:rgba(255,255,255,0.4); font-weight:600; padding:5px 0;
+  }
+
+  .drawer-divider{ height:1px; background:rgba(255,255,255,0.06); margin:8px 12px; }
+
+  .drawer-logout{
+    color:#FF7A8A;
+  }
+
+  /* ---------- VIEW: PULL SCREEN ---------- */
+  .pull-top{
+    display:flex; align-items:center; gap:12px; padding:20px 20px 10px;
+  }
+  .back-btn{
+    width:36px; height:36px; border-radius:12px; background:rgba(255,255,255,0.08);
+    display:flex; align-items:center; justify-content:center; color:#fff;
+  }
+  .pull-heading{ color:#fff; }
+  .pull-heading .eyebrow{ color:var(--r1); }
+  .pull-heading .realm-name{ font-size:19px; }
+
+  .pull-coin{
+    margin-left:auto; display:flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,0.08); padding:6px 12px; border-radius:999px;
+    font-family:'Space Mono',monospace; font-weight:700; font-size:12px; color:var(--accent-gold);
+  }
+
+  .pull-stage{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position:relative; padding:20px;
+  }
+
+  .portal-big{
+    position:relative; width:220px; height:220px; border-radius:50%;
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,0.9), rgba(124,147,255,0.15) 45%, transparent 70%),
+      radial-gradient(circle, #2C2A55, #14122A 70%);
+    box-shadow:0 0 60px 10px rgba(124,147,255,0.35);
+    display:flex; align-items:center; justify-content:center;
+    animation:breathe 4.5s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ box-shadow:0 0 50px 6px rgba(124,147,255,0.3); }
+    50%{ box-shadow:0 0 74px 16px rgba(124,147,255,0.5); }
+  }
+  .portal-ring{
+    position:absolute; inset:14px; border-radius:50%;
+    border:1px solid rgba(255,255,255,0.35);
+  }
+  .portal-ring.r2{ inset:30px; border-style:dashed; border-color:rgba(255,255,255,0.2); animation:spin 22s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  @media (prefers-reduced-motion:reduce){
+    .portal-big, .portal-ring.r2{ animation:none; }
+  }
+
+  .portal-mark{ font-family:'Fraunces', serif; font-style:italic; font-size:15px; color:rgba(255,255,255,0.85); }
+
+  .pity{ margin-top:18px; font-size:11.5px; color:rgba(255,255,255,0.5); text-align:center; }
+
+  .summon-btn{
+    margin-top:26px; border:none; cursor:pointer;
+    padding:14px 34px; border-radius:999px;
+    background:linear-gradient(160deg, #8FA0FF, #6C7CFF);
+    color:#fff; font-weight:800; font-size:14px; letter-spacing:.02em;
+    box-shadow:0 14px 26px -10px rgba(108,124,255,0.65);
+    display:flex; align-items:center; gap:8px;
+    transition:transform .15s ease, opacity .2s ease;
+  }
+  .summon-btn:active{ transform:scale(.97); }
+  .summon-btn:disabled{ opacity:.4; cursor:not-allowed; box-shadow:none; }
+
+  /* reveal card */
+  .reveal-wrap{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(10,8,20,0.55); backdrop-filter:blur(2px);
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+    z-index:8;
+  }
+  .reveal-wrap.show{ opacity:1; pointer-events:auto; }
+  .reveal-card{
+    width:220px; padding:26px 20px 22px; border-radius:22px;
+    background:linear-gradient(165deg, #201C3A, #14101F);
+    text-align:center; color:#fff;
+    transform:scale(.85) translateY(10px); opacity:0;
+    transition:all .35s cubic-bezier(.34,1.56,.64,1);
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  .reveal-wrap.show .reveal-card{ transform:scale(1) translateY(0); opacity:1; }
+  .reveal-rarity{
+    display:inline-block; font-family:'Space Mono',monospace; font-size:10px; font-weight:700;
+    letter-spacing:.12em; padding:5px 12px; border-radius:999px; margin-bottom:14px;
+  }
+  .reveal-glyph{
+    width:70px; height:70px; margin:0 auto 14px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+  }
+  .reveal-name{ font-family:'Fraunces', serif; font-weight:700; font-size:18px; margin-bottom:4px; }
+  .reveal-desc{ font-size:11.5px; color:rgba(255,255,255,0.55); line-height:1.5; margin-bottom:18px; }
+  .reveal-close{
+    border:none; background:rgba(255,255,255,0.1); color:#fff; font-weight:700; font-size:12.5px;
+    padding:9px 22px; border-radius:999px; cursor:pointer;
+  }
+</style>
+
+</head>
+<body>
+<div class="stage">
+  <div class="app-shell" id="shell">
+    <div class="petal p1"></div>
+    <div class="petal p2"></div>
+    <div class="petal p3"></div>
+
+    <!-- ============ DRAWER : PLAYER PANEL ============ -->
+    <div class="drawer-overlay" id="drawerOverlay">
+      <div class="drawer">
+        <div class="drawer-head">
+          <div class="drawer-avatar">R</div>
+          <div>
+            <div class="drawer-name" id="drawerPlayerName">REYSENOOR</div>
+            <div class="drawer-sub">Player Panel</div>
+          </div>
+          <div class="drawer-close" id="drawerClose">✕</div>
+        </div>
+        <div class="drawer-scroll">
+          <div class="drawer-link" data-page="dashboard"><span class="ico">🏠</span>Dashboard</div>
+
+          <div class="drawer-link active" data-page="gacha"><span class="ico">🎰</span>Gacha</div>
+
+          <div class="drawer-link" data-page="inventory"><span class="ico">🎒</span>Inventory</div>
+
+          <div class="drawer-link" data-page="topup"><span class="ico">💰</span>Top Up</div>
+          <div class="drawer-sub-list">
+            <div class="drawer-sub-item">Top Up Saldo</div>
+            <div class="drawer-sub-item">Convert Saldo → Ticket</div>
+            <div class="drawer-sub-item">Riwayat Top Up</div>
+          </div>
+
+          <div class="drawer-link" data-page="market"><span class="ico">🛒</span>Market</div>
+
+          <div class="drawer-link" data-page="role"><span class="ico">👑</span>Buy Role</div>
+
+          <div class="drawer-link" data-page="redeem"><span class="ico">🎟️</span>Redeem Code</div>
+
+          <div class="drawer-link" data-page="bulletin"><span class="ico">📢</span>Bulletin Board</div>
+
+          <div class="drawer-divider"></div>
+
+          <div class="drawer-link" data-page="transaction"><span class="ico">🧾</span>Transaction</div>
+
+          <div class="drawer-link" data-page="hasilbeli"><span class="ico">🎁</span>Hasil Beli</div>
+
+          <div class="drawer-link" data-page="profile"><span class="ico">👤</span>Profile</div>
+
+          <div class="drawer-divider"></div>
+
+          <div class="drawer-link drawer-logout" data-page="logout"><span class="ico">🚪</span>Logout</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ HALL VIEW ============ -->
+    <div class="view view-hall">
+      <div class="scroll">
+        <div class="topbar">
+          <div class="topbar-left">
+            <div class="burger" id="burgerBtn"><div class="dot"></div></div>
+            <div>
+              <div class="greet-title">Good morning!</div>
+              <div class="greet-sub" id="greetPlayerName">REYSENOOR</div>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <div class="lang-toggle">
+              <button class="active">EN</button>
+              <button>ID</button>
+            </div>
+            <div class="coin-chip"><span class="coin-dot">$</span><span id="coinTopbar">2</span></div>
+          </div>
+        </div>
+
+        <div class="hero">
+          <div class="eyebrow-row">
+            <div class="eyebrow">✦ CROWNPS Summon Hall</div>
+            <div class="coin-card">
+              <div class="coin-dot">$</div>
+              <div class="amt"><b id="coinHero">2</b><span>COINS</span></div>
+              <div class="coin-plus">+</div>
+            </div>
+          </div>
+          <h1 class="hero-title">Choose your realm</h1>
+          <p class="hero-sub">Four worlds. Four different summon experiences.</p>
+        </div>
+
+        <div class="realm-list">
+          <!-- REALM 1 -->
+          <div class="realm-card r1" data-realm="1" data-locked="0">
+            <div class="realm-motif">
+              <div class="stars" id="starfield"></div>
+              <div class="ring"></div>
+              <div class="core"></div>
+            </div>
+            <div class="realm-scrim"></div>
+            <div class="realm-top">
+              <div class="realm-tag" style="color:var(--r1)">Realm 01 · 19 items</div>
+              <div class="realm-name">Celestial Star</div>
+              <div class="realm-desc">Guide a newborn star through the constellation gate.</div>
+            </div>
+            <div class="realm-bottom">
+              <span></span>
+              <div class="go-arrow">→</div>
+            </div>
+          </div>
+
+          <!-- REALM 2 -->
+          <div class="realm-card r2 locked" data-realm="2" data-locked="1">
+            <div class="realm-motif">
+              <div class="arch"></div>
+              <div class="petal-mini" style="top:30%; left:16%;"></div>
+              <div class="petal-mini" style="top:55%; left:26%; width:6px; height:6px;"></div>
+            </div>
+            <div class="realm-scrim"></div>
+            <div class="realm-top">
+              <div class="realm-tag" style="color:var(--r2)">Realm 02 · 0 item</div>
+              <div class="realm-name">Bloom Sanctuary</div>
+              <div class="realm-desc">A living forest frame chooses the item in its heart.</div>
+            </div>
+            <div class="realm-bottom">
+              <div class="maint-pill">⏱ Maintenance</div>
+              <div class="lock-icon">🔒</div>
+            </div>
+          </div>
+
+          <!-- REALM 3 -->
+          <div class="realm-card r3 locked" data-realm="3" data-locked="1">
+            <div class="realm-motif">
+              <div class="dial"></div>
+            </div>
+            <div class="realm-scrim"></div>
+            <div class="realm-top">
+              <div class="realm-tag" style="color:var(--r3)">Realm 03 · 0 item</div>
+              <div class="realm-name">Arcana Choice</div>
+              <div class="realm-desc">Choose one falling mystery card and reveal your prize.</div>
+            </div>
+            <div class="realm-bottom">
+              <div class="maint-pill">⏱ Maintenance</div>
+              <div class="lock-icon">🔒</div>
+            </div>
+          </div>
+
+          <!-- REALM 4 -->
+          <div class="realm-card r4 locked" data-realm="4" data-locked="1">
+            <div class="realm-motif">
+              <div class="moon"></div>
+              <div class="gate"></div>
+            </div>
+            <div class="realm-scrim"></div>
+            <div class="realm-top">
+              <div class="realm-tag" style="color:var(--r4)">Realm 04 · 0 item</div>
+              <div class="realm-name">Clockwork Continuum</div>
+              <div class="realm-desc">Stop the time engine before its final ring aligns.</div>
+            </div>
+            <div class="realm-bottom">
+              <div class="maint-pill">⏱ Maintenance</div>
+              <div class="lock-icon">🔒</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottomnav">
+        <div class="nav-item"><span class="ico">🏠</span>Dashboard</div>
+        <div class="nav-item active"><span class="ico">✦</span>Gacha</div>
+        <div class="nav-fab">💳</div>
+        <div class="nav-item"><span class="ico">🏬</span>Market</div>
+        <div class="nav-item"><span class="ico">👤</span>Profile</div>
+      </div>
+
+      <div class="toast" id="toast">Realm under maintenance ✦ check back soon</div>
+    </div>
+
+    <!-- ============ PULL VIEW ============ -->
+    <div class="view view-pull">
+      <div class="pull-top">
+        <div class="back-btn" id="backBtn">←</div>
+        <div class="pull-heading">
+          <div class="eyebrow">Realm 01 · 19 items</div>
+          <div class="realm-name">Celestial Star</div>
+        </div>
+        <div class="pull-coin"><span>$</span><span id="coinPull">2</span></div>
+      </div>
+
+      <div class="pull-stage">
+        <div class="portal-big">
+          <div class="portal-ring"></div>
+          <div class="portal-ring r2"></div>
+          <div class="portal-mark">✦ summon</div>
+        </div>
+        <p class="pity" id="pityText">Next rare guaranteed in 6 pulls</p>
+        <button class="summon-btn" id="summonBtn">✦ Summon — 1 coin</button>
+
+        <div class="reveal-wrap" id="revealWrap">
+          <div class="reveal-card">
+            <span class="reveal-rarity" id="revRarity">Rare</span>
+            <div class="reveal-glyph" id="revGlyph">✦</div>
+            <div class="reveal-name" id="revName">Comet Tail Ribbon</div>
+            <div class="reveal-desc" id="revDesc">A silk ribbon spun from a comet's afterglow.</div>
+            <button class="reveal-close" id="revClose">Keep exploring</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const shell = document.getElementById('shell');
+  const toast = document.getElementById('toast');
+  const backBtn = document.getElementById('backBtn');
+  const summonBtn = document.getElementById('summonBtn');
+  const revealWrap = document.getElementById('revealWrap');
+  const revClose = document.getElementById('revClose');
+
+  let coins = 2;
+  const coinEls = () => document.querySelectorAll('#coinTopbar,#coinHero,#coinPull');
+  function renderCoins(){
+    coinEls().forEach(el => el.textContent = coins);
+    summonBtn.disabled = coins <= 0;
+    summonBtn.textContent = coins <= 0 ? 'Not enough coins' : '✦ Summon — 1 coin';
+  }
+
+  // starfield
+  const starfield = document.getElementById('starfield');
+  for(let i=0;i<14;i++){
+    const s = document.createElement('i');
+    s.style.top = Math.random()*100+'%';
+    s.style.left = Math.random()*100+'%';
+    s.style.animationDelay = (Math.random()*3)+'s';
+    starfield.appendChild(s);
+  }
+
+  // realm card taps
+  document.querySelectorAll('.realm-card').forEach(card => {
+    card.addEventListener('click', () => {
+      if(card.dataset.locked === '1'){
+        card.classList.remove('shake');
+        void card.offsetWidth;
+        card.classList.add('shake');
+        showToast('Realm under maintenance ✦ check back soon');
+        return;
+      }
+      shell.classList.add('pull-open');
+    });
+  });
+
+  backBtn.addEventListener('click', () => shell.classList.remove('pull-open'));
+
+  // drawer
+  const drawerOverlay = document.getElementById('drawerOverlay');
+  const burgerBtn = document.getElementById('burgerBtn');
+  const drawerClose = document.getElementById('drawerClose');
+  burgerBtn.addEventListener('click', () => drawerOverlay.classList.add('show'));
+  drawerClose.addEventListener('click', () => drawerOverlay.classList.remove('show'));
+  drawerOverlay.addEventListener('click', (e) => {
+    if(e.target === drawerOverlay) drawerOverlay.classList.remove('show');
+  });
+  document.querySelectorAll('.drawer-link').forEach(link => {
+    link.addEventListener('click', async () => {
+      const page = link.dataset.page;
+      drawerOverlay.classList.remove('show');
+      if(page === 'logout'){
+        await fetch('/api/logout', { method:'POST' });
+        window.location.href = '/login';
+        return;
+      }
+      if(page !== 'gacha'){
+        showToast('Halaman "' + link.textContent.trim() + '" belum terhubung di preview ini');
+      }
+    });
+  });
+
+  // ambil data player asli dari server
+  (async () => {
+    try{
+      const res = await fetch('/api/me');
+      if(!res.ok) return; // belum login, biarkan tampilan demo
+      const me = await res.json();
+      document.getElementById('greetPlayerName').textContent = me.growId;
+      document.getElementById('drawerPlayerName').textContent = me.growId;
+      coins = me.coin || 0;
+      renderCoins();
+    }catch(err){ /* diamkan, tetap pakai data demo */ }
+  })();
+
+  let toastTimer;
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> toast.classList.remove('show'), 1800);
+  }
+
+  const pool = [
+    {name:'Stardust Vial', rarity:'Common', glyph:'✧', desc:"Fine dust swept from a young star's trail."},
+    {name:'Comet Tail Ribbon', rarity:'Rare', glyph:'☄', desc:"A silk ribbon spun from a comet's afterglow."},
+    {name:'Nova Core Shard', rarity:'Epic', glyph:'✦', desc:'A fragment still warm from the last supernova.'},
+    {name:'Newborn Star Heart', rarity:'Legendary', glyph:'★', desc:'The very first light of a star yet to be named.'},
+    {name:'Gate Whisper Charm', rarity:'Common', glyph:'✧', desc:'A charm that hums when the gate is near.'},
+    {name:'Orbit Ring Bracelet', rarity:'Rare', glyph:'◎', desc:'Modeled after the ring of a distant planet.'},
+  ];
+  const rarityColor = {Common:'--common', Rare:'--rare', Epic:'--epic', Legendary:'--legendary'};
+
+  summonBtn.addEventListener('click', () => {
+    if(coins <= 0) return;
+    coins -= 1;
+    renderCoins();
+
+    const item = pool[Math.floor(Math.random()*pool.length)];
+    document.getElementById('revName').textContent = item.name;
+    document.getElementById('revDesc').textContent = item.desc;
+    document.getElementById('revGlyph').textContent = item.glyph;
+    const rEl = document.getElementById('revRarity');
+    rEl.textContent = item.rarity;
+    const c = getComputedStyle(document.documentElement).getPropertyValue(rarityColor[item.rarity]).trim();
+    rEl.style.background = c + '26';
+    rEl.style.color = c;
+    document.getElementById('revGlyph').style.background = c + '26';
+    document.getElementById('revGlyph').style.color = c;
+
+    revealWrap.classList.add('show');
+  });
+
+  revClose.addEventListener('click', () => revealWrap.classList.remove('show'));
+
+  renderCoins();
+</script>
+
+</body>
+</html>
